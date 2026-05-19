@@ -26,12 +26,15 @@ app.post('/api/rank/check', async (req, res) => {
   try {
 
     browser = await chromium.launch({
-      headless: true
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox'
+      ]
     })
 
     const page = await browser.newPage()
 
-    // 네이버 검색
     await page.goto(
       `https://search.naver.com/search.naver?query=${encodeURIComponent(keyword)}`,
       {
@@ -40,10 +43,8 @@ app.post('/api/rank/check', async (req, res) => {
       }
     )
 
-    // 로딩 대기
     await page.waitForTimeout(3000)
 
-    // 링크 수집
     const links = await page.$$eval('a', els => {
 
       return els
@@ -55,7 +56,6 @@ app.post('/api/rank/check', async (req, res) => {
 
     })
 
-    // 순위 계산
     const index = links.findIndex(item =>
       item.href.includes(targetUrl)
     )
