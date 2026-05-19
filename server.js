@@ -13,17 +13,21 @@ app.get('/', (req, res) => {
 
 app.post('/api/rank/check', async (req, res) => {
 
-  const { keyword, targetUrl } = req.body
+  console.log('API START')
 
-  if (!keyword || !targetUrl) {
+  const { keyword } = req.body
+
+  if (!keyword) {
     return res.status(400).json({
-      error: 'keyword, targetUrl required'
+      error: 'keyword required'
     })
   }
 
   let browser
 
   try {
+
+    console.log('BROWSER OPEN')
 
     browser = await chromium.launch({
       headless: true,
@@ -33,9 +37,25 @@ app.post('/api/rank/check', async (req, res) => {
       ]
     })
 
+    console.log('NEW PAGE')
+
     const page = await browser.newPage()
 
-    await page.waitForTimeout(3000)
+    await page.setUserAgent(
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+    )
+
+    console.log('GOTO START')
+
+    await page.goto(
+      `https://search.naver.com/search.naver?query=${encodeURIComponent(keyword)}`,
+      {
+        waitUntil: 'domcontentloaded',
+        timeout: 10000
+      }
+    )
+
+    console.log('GOTO END')
 
     const links = await page.$$eval('a[href]', els => {
 
@@ -51,6 +71,8 @@ app.post('/api/rank/check', async (req, res) => {
 
     })
 
+    console.log('LINKS:', links.length)
+
     const items = links.slice(0, 30)
 
     res.json({
@@ -61,6 +83,8 @@ app.post('/api/rank/check', async (req, res) => {
     })
 
   } catch (e) {
+
+    console.log('ERROR')
 
     console.error(e)
 
