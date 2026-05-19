@@ -56,17 +56,13 @@ app.post('/api/rank/check', async (req, res) => {
 
     })
 
-    const index = links.findIndex(item =>
-      item.href.includes(targetUrl)
-    )
+    const items = links.slice(0, 30)
 
     res.json({
       success: true,
       keyword,
-      targetUrl,
-      rank: index >= 0 ? index + 1 : null,
-      found: index >= 0,
-      total: links.length
+      total: items.length,
+      items
     })
 
   } catch (e) {
