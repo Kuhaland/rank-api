@@ -57,17 +57,16 @@ app.post('/api/rank/check', async (req, res) => {
 
     console.log('GOTO END')
 
-    const links = await page.$$eval('a[href]', els => {
+    await page.waitForSelector('.total_tit', {
+      timeout: 10000
+    })
 
-      return els
-        .map(el => ({
-          title: el.innerText?.trim(),
-          href: el.href
-        }))
-        .filter(item =>
-          item.href &&
-          item.title
-        )
+    const links = await page.$$eval('.total_tit', els => {
+
+      return els.map(el => ({
+        title: el.innerText?.trim(),
+        href: el.href
+      }))
 
     })
 
