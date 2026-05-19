@@ -35,24 +35,19 @@ app.post('/api/rank/check', async (req, res) => {
 
     const page = await browser.newPage()
 
-    await page.goto(
-      `https://search.naver.com/search.naver?query=${encodeURIComponent(keyword)}`,
-      {
-        waitUntil: 'domcontentloaded',
-        timeout: 30000
-      }
-    )
-
     await page.waitForTimeout(3000)
 
-    const links = await page.$$eval('a', els => {
+    const links = await page.$$eval('a[href]', els => {
 
       return els
         .map(el => ({
           title: el.innerText?.trim(),
           href: el.href
         }))
-        .filter(item => item.href)
+        .filter(item =>
+          item.href &&
+          item.title
+        )
 
     })
 
